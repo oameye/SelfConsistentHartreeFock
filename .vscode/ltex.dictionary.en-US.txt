@@ -1,0 +1,2 @@
+diagonalized
+Bogoliubov
