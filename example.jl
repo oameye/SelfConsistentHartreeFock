@@ -2,9 +2,9 @@ using SelfConsistentHartreeFock, QuantumToolbox
 using Plots
 using LaTeXStrings
 
-Δrange = range(-0.01, 0.03, 1000)
+Δrange = range(-0.01, 0.03, 300)
 Kval = 0.001
-Fval = 0.1
+Fval = 0.01
 
 # Options shared across both sweeps
 opt_gaussian = Option(;
@@ -59,7 +59,7 @@ function ρ_ss(Δ, F, K, γ; kwargs...)
     # real(QT.expect(a' * a, ρ_ss))
 end
 
-ρv = map(_Δ -> ρ_ss(_Δ, Kval, Fval, 0.0005), Δrange)
+ρv = map(_Δ -> ρ_ss(_Δ, Fval, Kval, 0.0005), Δrange)
 
 a = destroy(50) # a
 n_quantum = ρ -> real(expect(a' * a, ρ))
