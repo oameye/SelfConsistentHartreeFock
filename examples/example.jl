@@ -6,33 +6,33 @@ using LaTeXStrings
 Kval = 0.001
 Fval = 0.01
 
-# Options shared across both sweeps
-opt_gaussian = Option(;
-    max_iter=20_000,
-    tol=eps(),
-    mix=0.5,
-    backtrack=8,
-    mix_bounds=(0.05, 0.9),
-    accept_relax=0.995,
-    keep_nm_zero=false,
-    instability_damping=0.2,
+# Configuration shared across both sweeps
+config_gaussian = SolverConfig(
+    ; max_iter=20_000,
+      tol=eps(),
+      step_fraction=0.5,
+      backtrack=8,
+      step_bounds=(0.05, 0.9),
+      accept_relax=0.995,
+      keep_nm_zero=false,
+      unstable_scale=0.2,
 )
 
-opt_mean_field = Option(;
-    max_iter=20_000,
-    tol=eps(),
-    mix=0.5,
-    backtrack=8,
-    mix_bounds=(0.05, 0.9),
-    accept_relax=0.995,
-    keep_nm_zero=true,
-    instability_damping=0.2,
+config_mean_field = SolverConfig(
+    ; max_iter=20_000,
+      tol=eps(),
+      step_fraction=0.5,
+      backtrack=8,
+      step_bounds=(0.05, 0.9),
+      accept_relax=0.995,
+      keep_nm_zero=true,
+      unstable_scale=0.2,
 )
 param = Params(; Δ=first(Δrange), K=Kval, F=Fval)
 
 # Continuation sweep (up): reuse α from the previous solution as Δ increases
-cont_up = sweep_delta(collect(Δrange), param, 1e-3 + 0im, opt_gaussian)
-cont_up_mean = sweep_delta(collect(Δrange), param, 1e-3 + 0im, opt_mean_field)
+cont_up = sweep_delta(collect(Δrange), param, 1e-3 + 0im, config_gaussian)
+cont_up_mean = sweep_delta(collect(Δrange), param, 1e-3 + 0im, config_mean_field)
 α_up = getfield.(cont_up, :α)
 α_mean = getfield.(cont_up_mean, :α)
 n_up = getfield.(cont_up, :n)
@@ -41,7 +41,7 @@ m_up = getfield.(cont_up, :m)
 # Continuation sweep (down): start at the largest Δ and sweep backward,
 # then reverse to align with Δrange for plotting
 Δdown = reverse(collect(Δrange))
-cont_dn = sweep_delta(Δdown, param, 1e-3 + 0im, opt_gaussian)
+cont_dn = sweep_delta(Δdown, param, 1e-3 + 0im, config_gaussian)
 α_down = reverse(getfield.(cont_dn, :α))
 n_down = reverse(getfield.(cont_dn, :n))
 m_down = reverse(getfield.(cont_dn, :m))
