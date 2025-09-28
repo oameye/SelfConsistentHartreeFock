@@ -8,8 +8,6 @@ function solve(α0::Complex, p::Params, config::SolverConfig=SolverConfig())
     step = config.step
     iteration = config.iteration
 
-    @assert step.fraction > 0 && step.fraction ≤ 1 "step_fraction must be in (0,1]"
-
     # Initialize state variables
     state = SolverState(α0, 0.0, 0.0)
 

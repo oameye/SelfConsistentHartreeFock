@@ -7,10 +7,6 @@ function step_once(p::Params, state::SolverState, config::SolverConfig)
     step_cfg = config.step
     physics = config.physics
 
-    @assert step_cfg.fraction > 0 && step_cfg.fraction ≤ 1 "step_fraction must be in (0,1]"
-    @assert physics.omega_floor > 0 "omega_floor must be positive"
-    @assert step_cfg.unstable_scale > 0 && step_cfg.unstable_scale ≤ 1 "unstable_scale in (0,1]"
-
     ε, ΔB, ω2 = _coeffs(p, state.α, state.n, state.m)
 
     n_target, m_target = _correlators(ε, ΔB, ω2, physics)

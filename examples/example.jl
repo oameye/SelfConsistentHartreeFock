@@ -59,7 +59,7 @@ function ρ_ss(Δ, F, K, γ; kwargs...)
     # real(QT.expect(a' * a, ρ_ss))
 end
 
-ρv = map(_Δ -> ρ_ss(_Δ, Fval, Kval, 0.0005), Δrange)
+ρv = map(_Δ -> ρ_ss(_Δ, Fval, Kval, 0.001), Δrange)
 
 a = destroy(50) # a
 n_quantum = ρ -> real(expect(a' * a, ρ))
@@ -78,7 +78,7 @@ plt = plot(
     title="meanfield",
 )
 plot!(plt, Δrange, abs.(α_down); label="continuation down", lw=2, ls=:dot)
-plot!(plt, Δrange, n_q; label="quantum steady state", lw=2, ls=:dash, color=:black)
+plot!(plt, Δrange, sqrt.(n_q); label="quantum steady state", lw=2, ls=:dash, color=:black)
 plot!(plt, Δrange, abs.(α_mean); label="meanfield", lw=2, ls=:dashdot, color=:red)
 plt2 = plot(
     Δrange,
