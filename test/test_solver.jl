@@ -2,7 +2,26 @@ module test_solver
 
 using Test
 using SelfConsistentHartreeFock
-using SelfConsistentHartreeFock: Result, step_once
+using SelfConsistentHartreeFock: Result, step_once, _coeffs, _is_physical
+
+"""
+    diagnostics(p, α, n, m; tol=1e-12)
+
+Return a NamedTuple with (epsilon, DeltaB, omega, omega2, unstable, physical).
+"""
+function diagnostics(
+    p::Params, α::ComplexF64, n::Float64, m::ComplexF64; tol::Float64=1e-12
+)
+    ε, ΔB, ω2 = _coeffs(p, α, n, m)
+    ω = ω2 > 0 ? sqrt(ω2) : 0.0
+    unstable = !(ω2 > 0)
+    physical = (ω2 > 0) && _is_physical(n, m, tol)
+    return (epsilon=ε, DeltaB=ΔB, omega=ω, omega2=ω2, unstable=unstable, physical=physical)
+end
+
+function diagnostics(p::Params, res::Result; tol::Float64=1e-12)
+    return diagnostics(p, res.α, res.n, res.m; tol=tol)
+end
 
 @testset "basic solve" begin
     let p = Params(; Δ=1.0, K=0.05, F=0.2 + 0im),

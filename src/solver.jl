@@ -23,14 +23,10 @@ function solve(α0::Complex, p::Params, opt::Option=Option())
 
     # Main iteration loop
     for iteration in 1:(opt.max_iter)
-        # Advance one step using selected method
-        if opt.adapt_mixing
-            α_new, n_new, m_new, residual, current_mix = _advance_adaptive(
-                p, α, n, m, prev_residual, current_mix, opt
-            )
-        else
-            α_new, n_new, m_new, residual = _advance_basic(p, α, n, m, opt)
-        end
+        # Advance one step using adaptive method
+        α_new, n_new, m_new, residual, current_mix = _advance_adaptive(
+            p, α, n, m, prev_residual, current_mix, opt
+        )
 
         # Check convergence criteria
         max_change = max(abs(α_new - α), abs(n_new - n), abs(m_new - m))
@@ -103,40 +99,6 @@ end
 
 # --- adaptive mixing helpers ---
 
-function _with_meanfield_constraints(opt::Option)::Option
-    return Option(;
-        max_iter=opt.max_iter,
-        tol=opt.tol,
-        mix=opt.mix,
-        keep_nm_zero=true,
-        omega_floor=opt.omega_floor,
-        enforce_physical=opt.enforce_physical,
-        instability_damping=opt.instability_damping,
-        adapt_mixing=opt.adapt_mixing,
-        mix_bounds=opt.mix_bounds,
-        mix_scales=opt.mix_scales,
-        backtrack=opt.backtrack,
-        accept_relax=opt.accept_relax,
-    )
-end
-
-function _with_mix(opt::Option, mix::Float64)::Option
-    return Option(;
-        max_iter=opt.max_iter,
-        tol=opt.tol,
-        mix=mix,
-        keep_nm_zero=opt.keep_nm_zero,
-        omega_floor=opt.omega_floor,
-        enforce_physical=opt.enforce_physical,
-        instability_damping=opt.instability_damping,
-        adapt_mixing=opt.adapt_mixing,
-        mix_bounds=opt.mix_bounds,
-        mix_scales=opt.mix_scales,
-        backtrack=opt.backtrack,
-        accept_relax=opt.accept_relax,
-    )
-end
-
 function _residual_norm(
     α::ComplexF64, n::Float64, m::ComplexF64, α2::ComplexF64, n2::Float64, m2::ComplexF64
 )::Float64
@@ -198,13 +160,7 @@ end
 
 _mix_value(old::T, new::T, mix::Float64) where {T<:Number} = (1 - mix) * old + mix * new
 
-function _advance_basic(
-    p::Params, α::ComplexF64, n::Float64, m::ComplexF64, opt::Option
-)::Tuple{ComplexF64,Float64,ComplexF64,Float64}
-    α_next, n_next, m_next = step_once(p, α, n, m, opt)
-    resid_new = _residual_norm(α, n, m, α_next, n_next, m_next)
-    return α_next, n_next, m_next, resid_new
-end
+
 
 function _advance_adaptive(
     p::Params, α::ComplexF64, n::Float64, m::ComplexF64, prev_residual::Float64,
@@ -246,4 +202,47 @@ function _advance_adaptive(
     residual_fallback = _residual_norm(α, n, m, α_fallback, n_fallback, m_fallback)
 
     return α_fallback, n_fallback, m_fallback, residual_fallback, current_mix
+end
+
+"""
+    _coeffs(p, α, n, m) -> (ε, ΔB, ω2)
+
+Compute quadratic coefficients and ω² for the Gaussian Hamiltonian.
+"""
+function _coeffs(p::Params, α::ComplexF64, n::Float64, m::ComplexF64)
+    Δ = p.Δ
+    K = p.K
+    ε = -Δ + 4.0 * K * (abs2(α)) + 2.0 * K * n
+    ΔB = 2.0 * K * (α^2 + m)
+    ω2 = ε^2 - abs2(ΔB)
+    return ε, ΔB, ω2
+end
+
+function _alpha_update(p::Params, α::ComplexF64, n_new::Float64, m_new::ComplexF64)
+    Δ = p.Δ
+    K = p.K
+    F = p.F
+    A = (-Δ + 4.0 * K * n_new) + 2.0 * K * abs2(α)
+    B = 2.0 * K * m_new
+    denom = abs2(A) - abs2(B)
+    if abs(denom) < 1e-18
+        denom += 1e-18
+    end
+    return (B * conj(F) - conj(A) * F) / denom
+end
+
+function _is_physical(n::Float64, m::ComplexF64, tol::Float64)::Bool
+    return (n ≥ -tol) && (n * (n + 1.0) + tol ≥ abs2(m))
+end
+
+function _project_to_physical(n::Float64, m::ComplexF64)
+    np = max(n, 0.0)
+    bound = np * (np + 1.0)
+    m2 = abs2(m)
+    if m2 > bound && m2 > 0
+        scale = sqrt(max(bound, 0.0) / m2)
+        return np, m * scale
+    else
+        return np, m
+    end
 end
