@@ -80,8 +80,8 @@ function continuation_trace(
 
     completed = length(results)
     completed_requested = completed == 0 ? Float64[] : requested[1:completed]
-    return ContinuationTrace(
-        ; requested=completed_requested, results=results, stop_index=stop_index,
+    return ContinuationTrace(;
+        requested=completed_requested, results=results, stop_index=stop_index
     )
 end
 
@@ -91,7 +91,7 @@ end
 Sweep detuning values with warm-start continuation.
 """
 function sweep_delta(
-    Δs::AbstractVector{T}, base::Params, α0::Complex, config::SolverConfig=SolverConfig(),
+    Δs::AbstractVector{T}, base::Params, α0::Complex, config::SolverConfig=SolverConfig()
 ) where {T<:Real}
     trace = continuation_trace(Δs, base, α0, config; stop_on_failure=false)
     return continuation_results(trace)

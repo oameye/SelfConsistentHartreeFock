@@ -45,6 +45,7 @@ end
 
     let p = Params(; Δ=1.5, K=0.1, F=0.25 + 0.1im),
         config = SolverConfig(; step_fraction=0.4)
+
         s0 = SolverState(; α=0.1 + 0.0im, n=0.0, m=0.0 + 0im)
         s1 = step_once(p, s0, config)
         δ = _state_max_change(s0, s1)
@@ -55,18 +56,18 @@ end
 end
 
 @testset "SolverConfig builder" begin
-    cfg = SolverConfig(
-        ; max_iter=42,
-          tol=1e-8,
-          step_fraction=0.6,
-          keep_nm_zero=true,
-          omega_floor=1e-9,
-          enforce_physical=false,
-          step_bounds=(0.05, 0.7),
-          step_scales=(1.1, 0.4),
-          backtrack=4,
-          accept_relax=0.95,
-          unstable_scale=0.8,
+    cfg = SolverConfig(;
+        max_iter=42,
+        tol=1e-8,
+        step_fraction=0.6,
+        keep_nm_zero=true,
+        omega_floor=1e-9,
+        enforce_physical=false,
+        step_bounds=(0.05, 0.7),
+        step_scales=(1.1, 0.4),
+        backtrack=4,
+        accept_relax=0.95,
+        unstable_scale=0.8,
     )
     @test cfg.iteration.max_iter == 42
     @test cfg.iteration.tol == 1e-8
@@ -89,13 +90,13 @@ end
 
 @testset "basic solve" begin
     let p = Params(; Δ=1.0, K=0.05, F=0.2 + 0im),
-    config = SolverConfig(; max_iter=200, tol=1e-12, step_fraction=0.3)
+        config = SolverConfig(; max_iter=200, tol=1e-12, step_fraction=0.3)
 
         res = solve(0.0 + 0im, p, config)
         @test res isa Result
         @test res.converged || res.iterations == config.iteration.max_iter
         # compute diagnostics via helper
-    d = diagnostics(p, res)
+        d = diagnostics(p, res)
         @test isfinite(d.epsilon) && isfinite(d.omega)
         @test res.α == conj(conj(res.α)) # roundtrip sanity
     end
@@ -103,7 +104,7 @@ end
 
 @testset "keyword solve wrappers" begin
     let p = Params(; Δ=1.0, K=0.05, F=0.2 + 0im),
-    config = SolverConfig(; max_iter=150, tol=1e-10, step_fraction=0.25)
+        config = SolverConfig(; max_iter=150, tol=1e-10, step_fraction=0.25)
 
         res_kw = solve(p; config=config, α0=0.0 + 0im)
         res_ref = solve(0.0 + 0im, p, config)
@@ -125,7 +126,7 @@ end
 
 @testset "determinism for same IC" begin
     let p = Params(; Δ=1.0, K=0.05, F=0.2 + 0im),
-    config = SolverConfig(; max_iter=150, tol=1e-10, step_fraction=0.25)
+        config = SolverConfig(; max_iter=150, tol=1e-10, step_fraction=0.25)
 
         res1 = solve(0.0 + 0im, p, config)
         res2 = solve(0.0 + 0im, p, config)
@@ -140,14 +141,18 @@ end
 @testset "step_once progression" begin
     let p = Params(; Δ=1.0, K=0.05, F=0.2 + 0im)
         state = SolverState(; α=0.2 + 0im, n=0.0, m=0.0 + 0im)
-    config = SolverConfig(; step_fraction=0.3)
+        config = SolverConfig(; step_fraction=0.3)
         for _ in 1:10
             state = step_once(p, state, config)
             d = diagnostics(p, state)
             @test isfinite(d.epsilon) && isfinite(d.omega)
             @test !isnan(real(d.DeltaB))
         end
-    res = solve(p; config=SolverConfig(; max_iter=200, tol=1e-10, step_fraction=0.3), α0=0.0 + 0im)
+        res = solve(
+            p;
+            config=SolverConfig(; max_iter=200, tol=1e-10, step_fraction=0.3),
+            α0=0.0 + 0im,
+        )
         # After 10 steps we should be in the vicinity of the solved alpha
         @test isapprox(state.α, res.α; rtol=5e-2, atol=5e-3)
     end
@@ -155,7 +160,7 @@ end
 
 @testset "physical flag and stability classification" begin
     let p = Params(; Δ=1.0, K=0.05, F=0.2 + 0im),
-    config = SolverConfig(; max_iter=200, tol=1e-12, step_fraction=0.3)
+        config = SolverConfig(; max_iter=200, tol=1e-12, step_fraction=0.3)
 
         res = solve(0.0 + 0im, p, config)
         # If stable, result should be flagged physical and satisfy positivity
@@ -176,18 +181,23 @@ end
         @test d0.omega == 0.0
 
         # No enforcement: allow nonphysical correlators
-    config1 = SolverConfig(; step_fraction=1.0, omega_floor=1e-2, enforce_physical=false, unstable_scale=1.0)
-    state1 = step_once(p, state0, config1)
+        config1 = SolverConfig(;
+            step_fraction=1.0, omega_floor=1e-2, enforce_physical=false, unstable_scale=1.0
+        )
+        state1 = step_once(p, state0, config1)
 
         # With enforcement: correlators are projected to the physical region
-    config2 = SolverConfig(; step_fraction=1.0, omega_floor=1e-2, enforce_physical=true, unstable_scale=1.0)
-    state2 = step_once(p, state0, config2)
+        config2 = SolverConfig(;
+            step_fraction=1.0, omega_floor=1e-2, enforce_physical=true, unstable_scale=1.0
+        )
+        state2 = step_once(p, state0, config2)
         @test state2.n ≥ -1e-12
         @test state2.n * (state2.n + 1.0) + 1e-12 ≥ abs2(state2.m)
 
         # Typically the unenforced step violates positivity
         # (don't require it strictly in case parameters change)
-        violated = !(state1.n ≥ -1e-12 && state1.n * (state1.n + 1.0) + 1e-12 ≥ abs2(state1.m))
+        violated =
+            !(state1.n ≥ -1e-12 && state1.n * (state1.n + 1.0) + 1e-12 ≥ abs2(state1.m))
         @test violated || isapprox(state2.m, state1.m; atol=0, rtol=0) == false
     end
 end
@@ -195,7 +205,9 @@ end
 @testset "mean-field only via keep_nm_zero" begin
     let p = Params(; Δ=1.0, K=0.1, F=0.3 + 0im)
         # Start from zero and iterate with n=m frozen (mean-field map)
-    config_mf = SolverConfig(; step_fraction=0.8, keep_nm_zero=true, max_iter=200, tol=1e-12)
+        config_mf = SolverConfig(;
+            step_fraction=0.8, keep_nm_zero=true, max_iter=200, tol=1e-12
+        )
         state = SolverState(; α=0.0 + 0im, n=0.0, m=0.0 + 0im)
         for _ in 1:40
             state = step_once(p, state, config_mf)

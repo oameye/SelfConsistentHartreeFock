@@ -6,9 +6,15 @@ using SelfConsistentHartreeFock
 @testset "bifurcation regression: cold vs continuation and hysteresis" begin
     let Δs = collect(range(2.0, 2.3; length=41)),
         base = Params(; Δ=Δs[1], K=1.0, F=0.9),
-    config = SolverConfig(; max_iter=4000, tol=1e-10, step_fraction=0.5,
-                  keep_nm_zero=true, backtrack=8,
-                  step_bounds=(0.05, 0.9), accept_relax=0.995)
+        config = SolverConfig(;
+            max_iter=4000,
+            tol=1e-10,
+            step_fraction=0.5,
+            keep_nm_zero=true,
+            backtrack=8,
+            step_bounds=(0.05, 0.9),
+            accept_relax=0.995,
+        )
 
         α0 = 1e-3 + 0im
 

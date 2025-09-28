@@ -7,26 +7,26 @@ Kval = 0.001
 Fval = 0.01
 
 # Configuration shared across both sweeps
-config_gaussian = SolverConfig(
-    ; max_iter=20_000,
-      tol=eps(),
-      step_fraction=0.5,
-      backtrack=8,
-      step_bounds=(0.05, 0.9),
-      accept_relax=0.995,
-      keep_nm_zero=false,
-      unstable_scale=0.2,
+config_gaussian = SolverConfig(;
+    max_iter=20_000,
+    tol=eps(),
+    step_fraction=0.5,
+    backtrack=8,
+    step_bounds=(0.05, 0.9),
+    accept_relax=0.995,
+    keep_nm_zero=false,
+    unstable_scale=0.2,
 )
 
-config_mean_field = SolverConfig(
-    ; max_iter=20_000,
-      tol=eps(),
-      step_fraction=0.5,
-      backtrack=8,
-      step_bounds=(0.05, 0.9),
-      accept_relax=0.995,
-      keep_nm_zero=true,
-      unstable_scale=0.2,
+config_mean_field = SolverConfig(;
+    max_iter=20_000,
+    tol=eps(),
+    step_fraction=0.5,
+    backtrack=8,
+    step_bounds=(0.05, 0.9),
+    accept_relax=0.995,
+    keep_nm_zero=true,
+    unstable_scale=0.2,
 )
 param = Params(; Δ=first(Δrange), K=Kval, F=Fval)
 
@@ -51,11 +51,11 @@ function ρ_ss(Δ, F, K, γ; kwargs...)
     a = destroy(N) # annihilation operator
     nth=0.01
 
-    H = - Δ * a' * a + K * a' * a' * a * a + F * (a'  +  a)
+    H = - Δ * a' * a + K * a' * a' * a * a + F * (a' + a)
     c_ops = [sqrt(γ)*a]
 
     solver = SteadyStateLinearSolver()
-    ρ_ss = steadystate(H, c_ops; solver,kwargs...) # Hamiltonian and collapse operators
+    ρ_ss = steadystate(H, c_ops; solver, kwargs...) # Hamiltonian and collapse operators
     # real(QT.expect(a' * a, ρ_ss))
 end
 

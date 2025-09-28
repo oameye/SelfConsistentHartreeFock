@@ -5,7 +5,7 @@ using SelfConsistentHartreeFock
 
 using JLD2
 current_path = @__DIR__
-    data = load(joinpath(@__DIR__, "correction_test.jld2"))
+data = load(joinpath(@__DIR__, "correction_test.jld2"))
 Δrange = data["Δrange"]
 
 αv = map(Δrange) do _Δ

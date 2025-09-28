@@ -4,15 +4,15 @@ using Plots
 Δrange = range(-3.0, 6, 600)
 
 # Configuration shared across both sweeps
-config = SolverConfig(
-        ; max_iter=20_000,
-            tol=eps(),
-            step_fraction=0.5,
-            backtrack=8,
-            step_bounds=(0.05, 0.9),
-            accept_relax=0.995,
-            keep_nm_zero=true,
-            unstable_scale=0.2,
+config = SolverConfig(;
+    max_iter=20_000,
+    tol=eps(),
+    step_fraction=0.5,
+    backtrack=8,
+    step_bounds=(0.05, 0.9),
+    accept_relax=0.995,
+    keep_nm_zero=true,
+    unstable_scale=0.2,
 )
 
 # Cold sweep: independent solves for each Δ with the same small initial α

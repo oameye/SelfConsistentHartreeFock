@@ -1,13 +1,13 @@
 module SelfConsistentHartreeFock
 
 export Params,
-	   SolverConfig,
-	   ContinuationTrace,
-	   solve,
-	   solve_meanfield,
-	   sweep_delta,
-	   converged,
-	   continuation_trace
+    SolverConfig,
+    ContinuationTrace,
+    solve,
+    solve_meanfield,
+    sweep_delta,
+    converged,
+    continuation_trace
 
 include("types.jl")
 include("physics.jl")

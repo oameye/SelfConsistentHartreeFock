@@ -43,8 +43,7 @@ end
 
 # One HFB iteration step (T = 0):
 # returns (n_new, m_new, α_new, Ω, G, ω̃)
-function iteration_step(HFBParams,
-    α::ComplexF64, n::Float64, m::ComplexF64)
+function iteration_step(HFBParams, α::ComplexF64, n::Float64, m::ComplexF64)
     Δ, K, F = Params
     Ω = Δ - 4K * (abs2(α) + n)
     G = K * (α^2 + m)
@@ -88,9 +87,18 @@ function solve_hfb(par::Parameters; opt::Options=Options())
         if !(isfinite(ω̃̂) && ω̃̂ > 0)
             stable = false
             Ω, G, ω̃ = Ω̂, Ĝ, ω̃̂
-            return (α=α, n=n, m=m, Ω=Ω, G=G, ω̃=ω̃,
-                stable=stable, converged=false, iters=it,
-                residuals=(δα=NaN, δn=NaN, δm=NaN))
+            return (
+                α=α,
+                n=n,
+                m=m,
+                Ω=Ω,
+                G=G,
+                ω̃=ω̃,
+                stable=stable,
+                converged=false,
+                iters=it,
+                residuals=(δα=NaN, δn=NaN, δm=NaN),
+            )
         end
 
         # under-relaxed updates
@@ -110,15 +118,33 @@ function solve_hfb(par::Parameters; opt::Options=Options())
 
         if δα < opt.tol && δn < opt.tol && δm < opt.tol
             converged = true
-            return (α=α, n=n, m=m, Ω=Ω, G=G, ω̃=ω̃,
-                stable=stable, converged=converged, iters=it,
-                residuals=(δα=δα, δn=δn, δm=δm))
+            return (
+                α=α,
+                n=n,
+                m=m,
+                Ω=Ω,
+                G=G,
+                ω̃=ω̃,
+                stable=stable,
+                converged=converged,
+                iters=it,
+                residuals=(δα=δα, δn=δn, δm=δm),
+            )
         end
     end
 
-    (α=α, n=n, m=m, Ω=Ω, G=G, ω̃=ω̃,
-        stable=stable, converged=converged, iters=opt.max_iter,
-        residuals=(δα=NaN, δn=NaN, δm=NaN))
+    (
+        α=α,
+        n=n,
+        m=m,
+        Ω=Ω,
+        G=G,
+        ω̃=ω̃,
+        stable=stable,
+        converged=converged,
+        iters=opt.max_iter,
+        residuals=(δα=NaN, δn=NaN, δm=NaN),
+    )
 end
 
 # ---------------------- Minimal example -----------------------------------
@@ -130,7 +156,7 @@ if abspath(PROGRAM_FILE) == @__FILE__
     F = 0.25 + 0im
 
     par = Parameters(Δ, K, F)
-    opt = Options(η=0.6, tol=1e-12, verbose=false)
+    opt = Options(; η=0.6, tol=1e-12, verbose=false)
 
     res = solve_hfb(par; opt=opt)
 

@@ -37,7 +37,9 @@ function _state_max_change(state::SolverState, candidate::SolverState)::Float64
     return _residual_norm(state, candidate)
 end
 
-_blend_value(old::T, new::T, fraction::Float64) where {T<:Number} = (1 - fraction) * old + fraction * new
+function _blend_value(old::T, new::T, fraction::Float64) where {T<:Number}
+    (1 - fraction) * old + fraction * new
+end
 
 function _effective_fraction(ω2::Float64, step_cfg::AdaptiveStepConfig)::Float64
     return (ω2 > 0) ? step_cfg.fraction : (step_cfg.fraction * step_cfg.unstable_scale)

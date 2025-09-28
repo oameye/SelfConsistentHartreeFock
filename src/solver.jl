@@ -45,14 +45,8 @@ function solve(α0::Complex, p::Params, config::SolverConfig=SolverConfig())
     unstable = !(ω2 > 0)
     physical = (ω2 > 0) && _is_physical(state.n, state.m, max(iteration.tol, 1e-12))
 
-    return Result(
-        ; α=state.α,
-          n=state.n,
-          m=state.m,
-          converged,
-          iterations,
-          unstable,
-          physical,
+    return Result(;
+        α=state.α, n=state.n, m=state.m, converged, iterations, unstable, physical
     )
 end
 
@@ -70,7 +64,11 @@ function solve_meanfield(p::Params, config::SolverConfig)
     return solve_meanfield(p; config=config)
 end
 
-function solve(p::Params; config::SolverConfig=SolverConfig(), α0::Complex=_default_initial_guess(p, config))
+function solve(
+    p::Params;
+    config::SolverConfig=SolverConfig(),
+    α0::Complex=_default_initial_guess(p, config),
+)
     return solve(α0, p, config)
 end
 
@@ -79,7 +77,9 @@ function solve(p::Params, config::SolverConfig)
 end
 
 function solve_meanfield(
-    p::Params; config::SolverConfig=SolverConfig(), α0::Complex=_default_initial_guess(p, config)
+    p::Params;
+    config::SolverConfig=SolverConfig(),
+    α0::Complex=_default_initial_guess(p, config),
 )
     meanfield_config = _with_meanfield_constraints(config)
     return solve(α0, p, meanfield_config)

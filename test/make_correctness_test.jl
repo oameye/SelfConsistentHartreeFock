@@ -19,8 +19,8 @@ problem.system.expressions
 result = get_steady_states(problem, WarmUp())
 plot(result; y="sqrt(aᵣ^2 + aᵢ^2)")
 
-branches = get_branches(result, "sqrt(aᵣ^2 + aᵢ^2)", class="stable")
+branches = get_branches(result, "sqrt(aᵣ^2 + aᵢ^2)"; class="stable")
 
 using DrWatson
-data = Dict("branch"=> branches[1],"Δrange" => Δrange)
-save(projectdir("test","correction_test.jld2"), data)
+data = Dict("branch" => branches[1], "Δrange" => Δrange)
+save(projectdir("test", "correction_test.jld2"), data)

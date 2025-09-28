@@ -18,8 +18,14 @@ using SelfConsistentHartreeFock:
 @testset "sweep_delta warm-start determinism (mean-field)" begin
     let Δs = collect(range(2.0, 2.3; length=7)),
         base = Params(; Δ=Δs[1], K=1.0, F=0.9),
-    config = SolverConfig(; max_iter=2000, tol=1e-12, step_fraction=0.5,
-                  keep_nm_zero=true, backtrack=6, step_bounds=(0.05, 0.9))
+        config = SolverConfig(;
+            max_iter=2000,
+            tol=1e-12,
+            step_fraction=0.5,
+            keep_nm_zero=true,
+            backtrack=6,
+            step_bounds=(0.05, 0.9),
+        )
 
         α0 = 1e-3 + 0im
         res = sweep_delta(Δs, base, α0, config)
@@ -30,7 +36,7 @@ using SelfConsistentHartreeFock:
             if i == 1
                 r = solve_meanfield(α0, p, config)
             else
-                r = solve_meanfield(res[i-1].α, p, config)
+                r = solve_meanfield(res[i - 1].α, p, config)
             end
             @test isapprox(res[i].α, r.α; rtol=1e-12, atol=1e-12)
             @test isapprox(res[i].n, r.n; rtol=1e-12, atol=1e-12)
@@ -43,8 +49,14 @@ end
 @testset "sweep_delta warm-start determinism (down)" begin
     let Δs = collect(range(2.3, 2.0; length=7)),
         base = Params(; Δ=Δs[1], K=1.0, F=0.9),
-    config = SolverConfig(; max_iter=2000, tol=1e-12, step_fraction=0.5,
-                  keep_nm_zero=true, backtrack=6, step_bounds=(0.05, 0.9))
+        config = SolverConfig(;
+            max_iter=2000,
+            tol=1e-12,
+            step_fraction=0.5,
+            keep_nm_zero=true,
+            backtrack=6,
+            step_bounds=(0.05, 0.9),
+        )
 
         α0 = 1e-3 + 0im
         res = sweep_delta(Δs, base, α0, config)
@@ -54,7 +66,7 @@ end
             if i == 1
                 r = solve_meanfield(α0, p, config)
             else
-                r = solve_meanfield(res[i-1].α, p, config)
+                r = solve_meanfield(res[i - 1].α, p, config)
             end
             @test isapprox(res[i].α, r.α; rtol=1e-12, atol=1e-12)
             @test isapprox(res[i].n, r.n; rtol=1e-12, atol=1e-12)
@@ -67,8 +79,9 @@ end
 @testset "continuation trace metadata" begin
     let Δs = collect(range(2.0, 2.2; length=5)),
         base = Params(; Δ=Δs[1], K=1.0, F=0.9),
-    config = SolverConfig(; max_iter=3000, tol=1e-12, step_fraction=0.5,
-                              keep_nm_zero=true, backtrack=6)
+        config = SolverConfig(;
+            max_iter=3000, tol=1e-12, step_fraction=0.5, keep_nm_zero=true, backtrack=6
+        )
 
         α0 = 1e-3 + 0im
         trace = continuation_trace(Δs, base, α0, config)
@@ -89,13 +102,12 @@ end
 @testset "continuation trace failure handling" begin
     let Δs = [2.0, 2.1, 2.2],
         base = Params(; Δ=Δs[1], K=1.0, F=0.9),
-    config = SolverConfig(; max_iter=0, tol=1e-12, step_fraction=0.3,
-                              keep_nm_zero=true)
+        config = SolverConfig(; max_iter=0, tol=1e-12, step_fraction=0.3, keep_nm_zero=true)
 
         α0 = 1e-3 + 0im
         trace = continuation_trace(Δs, base, α0, config; stop_on_failure=true)
-    @test continuation_stopped(trace)
-    @test continuation_stopindex(trace) == 1
+        @test continuation_stopped(trace)
+        @test continuation_stopindex(trace) == 1
         @test continuation_completed(trace) == 1
         @test !continuation_results(trace)[1].converged
         @test !isempty(continuation_failures(trace))
