@@ -3,10 +3,19 @@ uuid = "420afec6-9d8f-4f29-829c-3c73bacde9e9"
 authors = ["Orjan Ameye <orjan.ameye@hotmail.com>"]
 version = "0.1.0"
 
+[compat]
+Aqua = "0.8.11"
+JET = "0.9.18, 0.10"
+julia = "1.10"
+JLD2 = "0.6.2"
+Test = "1.10.0"
+
+
 [extras]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 JET = "c3a54625-cd67-489e-a8e7-0a5a0ff4e31b"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 
 [targets]
-test = ["Test", "JET", "Aqua"]
+test = ["Test", "JET", "Aqua", "JLD2"]
